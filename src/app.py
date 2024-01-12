@@ -8,7 +8,7 @@ from flask_swagger import Swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Starships, Planets, Characters, FavouriteStarships, FavouritePlanets, FavouriteCharacters
+from models import db, User, Planets, Characters, FavouritePlanets, FavouriteCharacters
 
 #from models import User
 
@@ -150,7 +150,31 @@ def user_favourites(user_id):
     favourite_characters = FavouriteCharacters.query.filter_by(user_id = user_id)  
     Characters = [character_serialized() for character in favourite_characters]
 
-    return jsonify("Favourite", Starships, Planets, Characters ), 200
+    return jsonify("Favourite", Planets, Characters ), 200
+
+@app.route('/favourite/planet/<int:planet_id>', methods=['POST'])
+def add_fav_planet(planet_id):
+    select_planet= Planets.query.get(planet_id)
+    body =  request.json
+    id_user = body.get("id_user")
+    actual_user = User.query.get(id_user)
+
+    FavouritePlanets = FavouritePlanets(
+        user = actual_user,
+        planets = select_planet
+    )
+
+    try:
+        db.session.add(FavouritePlanets)
+        db.session.commit()
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({
+            "message": "Fatal error",
+            "error": error.args
+        })
+    
+    return jsonify({}), 200
 
 
 # this only runs if `$ python src/app.py` is executed
