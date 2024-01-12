@@ -77,25 +77,6 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
-@app.route("/starships", methods= ['GET'])
-def get_all_starships():
- starship = Starships.query.all()
- starship_serialized = list(map(lambda x: x.serialize(), starship))
- return jsonify({"msg:" "Completed", "Starship": starship_serialized})
-
-@app.route('/starships/<int: starship_id>', methods=['GET'])
-def handle_starship(starship_id):
-    single_starship = Starships.query.get(starship_id)
-    if single_starship is None:
-        raise APIException(f"Starship ID not found {starship_id}", status_code=400)
-
-    response_body = {
-        "msg": "Hi this is your GET /starship response",
-        "starship_id": starship_id,
-        "starship_info": single_starship.serialize()
-    }
-
-    return jsonify(response_body), 200
 
 @app.route("/planets", methods= ['GET'])
 def get_all_planets():
@@ -163,14 +144,11 @@ def handle_users(user_id):
 @app.route('/users/favourites/<int:user_id>', methods= ['GET'])
 def user_favourites(user_id):
     
-    favourite_starship = FavouriteStarships.query.filter_by(user_id = user_id)  
-    Starships = [starship_serialize() for starship in favourite_starship]
-    
     favourite_planets = FavouritePlanets.query.filter_by(user_id = user_id)  
-    Planets = [planet_serialize() for planet in favourite_planets]
+    Planets = [planet_serialized() for planet in favourite_planets]
     
     favourite_characters = FavouriteCharacters.query.filter_by(user_id = user_id)  
-    Characters = [character_serialize() for character in favourite_characters]
+    Characters = [character_serialized() for character in favourite_characters]
 
     return jsonify("Favourite", Starships, Planets, Characters ), 200
 
