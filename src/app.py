@@ -4,7 +4,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 import os
 from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
-from flask_swagger import Swagger
+from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
@@ -43,7 +43,7 @@ def sitemap():
 def handle_hello():
 
     response_body = {
-        "msg": "Hello, this is your GET /user response "
+        "msg": "Hello, this is your GET /user response"
     }
 
     return jsonify(response_body), 200
@@ -91,7 +91,7 @@ def handle_planets(planets_id):
        raise APIException(f"Planet ID not found {planets_id}", status_code=400)
     
     response_body = {
-        "msg": "Hello, this is your GET /planets response ",
+        "msg": "Hello, this is your GET /planets response",
         "planets_id": planets_id,
         "planets_info": single_planets.serialize()
     }
@@ -111,7 +111,7 @@ def handle_characters(character_id):
        raise APIException(f"Character ID not found {character_id}", status_code=400)
     
     response_body = {
-        "msg": "Hello, this is your GET /planets response ",
+        "msg": "Hello, this is your GET /characters response",
         "planets_id": character_id,
         "planets_info": single_character.serialize()
     }
@@ -145,10 +145,10 @@ def handle_users(user_id):
 def user_favourites(user_id):
     
     favourite_planets = FavouritePlanets.query.filter_by(user_id = user_id)  
-    Planets = [planet_serialized() for planet in favourite_planets]
+    Planets = [planets_serialized() for planets in favourite_planets]
     
     favourite_characters = FavouriteCharacters.query.filter_by(user_id = user_id)  
-    Characters = [character_serialized() for character in favourite_characters]
+    Characters = [characters_serialized() for characters in favourite_characters]
 
     return jsonify("Favourite", Planets, Characters ), 200
 
