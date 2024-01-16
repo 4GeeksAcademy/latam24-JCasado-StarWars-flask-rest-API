@@ -4,7 +4,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 import os
 from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
-from flask_swagger import swagger
+from flask_swagger import Swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
@@ -169,6 +169,7 @@ def add_fav_planet(planet_id):
         db.session.commit()
     except Exception as error:
         db.session.rollback()
+
         return jsonify({
             "message": "Fatal error",
             "error": error.args
@@ -176,6 +177,67 @@ def add_fav_planet(planet_id):
     
     return jsonify({}), 200
 
+@app.route('/favourite/planet/<int:planet_id>', methods=['DELETE'])
+def delete_fv_planet(planet_id):
+    delete_planet = FavouritePlanets.query.get(planet_id)
+
+    try:
+            db.session.delete(delete_planet)
+            db.session.commit()
+
+    except Exception as error:
+            db.session.rollback()
+
+    return jsonify({ 
+                "message": "Internal error",
+                "error": error.args
+            })
+
+    return jsonify({}), 200
+
+@app.route('/favourite/character/<int:character_id>', methods=['POST'])
+def add_fv_character(character_id):
+    select_character = Characters.query.get(character_id)
+    body = request.json
+    user_id = body.get("user_id")
+    actual_user = User.query.get(user_id)
+
+    favourite_character = FavouriteCharacters(
+        user = actual_user,
+        character = select_character
+    )
+
+    try:
+        db.session.add(favourite_character)
+        db.session.commit()
+
+    except Exception as error:
+        db.session.rollback()
+
+        return jsonify({
+            "message": "ERROR INTERNO",
+            "error": error.args
+        })
+    
+    return jsonify({}), 200
+
+@app.route('/favourite/character/<int:character_id>', methods=['DELETE'])
+def delete_fv_character(character_id):
+    delete_character = FavouriteCharacters.query.get(character_id)
+
+    try:
+        db.session.delete(delete_character)
+        db.session.commit()
+
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({
+            "message": "Internal error",
+            "error": error.args
+        })
+    
+    return jsonify({}), 200
+    
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
